@@ -82,6 +82,7 @@ function Seg(x1,y1,z1,x2,y2,z2){
 
 function Cube(x,y,z, scale=1, color = "#fff"){
 	Q={};
+  Q.hit = 15;
 	Q.x=x;
 	Q.y=y;
 	Q.z=z;
@@ -142,6 +143,34 @@ function rotateShape(shape, yaw, pitch, roll){
 	}
 }
 
+function mangleShape(shape, amount){
+	var x,y,z,p,d;
+	for(var i=0;i<shape.s.length;++i){
+		for(var j=2;j--;){
+			if(j){
+				x=shape.s[i].a.x;
+				y=shape.s[i].a.y;
+				z=shape.s[i].a.z;
+			}else{
+				x=shape.s[i].b.x;
+				y=shape.s[i].b.y;
+				z=shape.s[i].b.z;
+			}
+			x+=Math.random()*amount-amount/2;
+      y+=Math.random()*amount-amount/2;
+      z+=Math.random()*amount-amount/2;
+			if(j){
+				shape.s[i].a.x=x;
+				shape.s[i].a.y=y;
+				shape.s[i].a.z=z;
+			}else{
+				shape.s[i].b.x=x;
+				shape.s[i].b.y=y;
+				shape.s[i].b.z=z;
+			}
+		}
+	}
+}
 
 function drawFloorAndCeiling(){
 
@@ -203,7 +232,7 @@ function clearScreen(){
   x.globalAlpha=1
   if(showHud)x.drawImage(hud,0,0,w*2,h*2)
   x.fillStyle="#4F4"
-  x.font = "20px Arial"
+  x.font = "30px Arial"
   x.fillText('collected: '+playerCubeScore, 20, 20);
 }
 
@@ -269,9 +298,17 @@ function handleShapes(){
     rotateShape(shapes[i],.01,.02,i/1000)
 
     if(camX-shapes[i].x<playerRadius && camX-shapes[i].x>-playerRadius &&
-      camZ-shapes[i].z<playerRadius && camZ-shapes[i].z>-playerRadius){
-        playerCubeScore++; shapes.splice(i,1) }
+      camZ-shapes[i].z<playerRadius && camZ-shapes[i].z>-playerRadius && shapes[i].hit == 15){
+        playerCubeScore++; shapes[i].hit-- }
 
+    if(shapes[i].hit < 15){
+      rotateShape(shapes[i],.04,.07,-i/1000)
+      mangleShape(shapes[i],.5);
+      shapes[i].y -= .2;
+      shapes[i].hit--;
+    }
+
+    if(shapes[i].hit < 0)shapes.splice(i,1);
 
   }
 }
@@ -298,7 +335,7 @@ function loadScene(){
       ng.nextFloatRange(-fieldRadius, fieldRadius),
       ng.nextFloatRange(floor-ceiling-2, floor-1), //floor-1-Math.random()*(floor-ceiling-2),
       ng.nextFloatRange(-fieldRadius, fieldRadius),
-      ng.nextFloatRange(.5, 2),  //1+Math.random()-.5, //scale
+      1,  //1+Math.random()-.5, //scale
       cubeColors[ng.nextIntRange(0,2)]
     ))
   }
@@ -306,7 +343,7 @@ function loadScene(){
   for(let i=0;i<100;++i){
     terrain.push(new Cube(
       ng.nextFloatRange(-fieldRadius, fieldRadius),
-      0,
+      0       ,
       ng.nextFloatRange(-fieldRadius, fieldRadius),
       1,
       '#00f'
