@@ -16,10 +16,10 @@ function P3D(X,Y,Z){
 
 
 function handleCamera(){
-  
+
 	if(mx){
 		camYawV+=mx/400;
-		mx=0;		
+		mx=0;
 	}
 	if(my){
 		camPitchV+=my/400;
@@ -80,11 +80,13 @@ function Seg(x1,y1,z1,x2,y2,z2){
 }
 
 
-function Cube(x,y,z){
+function Cube(x,y,z, scale=1, color = "#fff"){
 	Q={};
 	Q.x=x;
 	Q.y=y;
 	Q.z=z;
+  Q.c=color;
+  Q.scale=scale;
 	Q.s=[];
 	Q.s.push(new Seg(-1,-1,-1,1,-1,-1));
 	Q.s.push(new Seg(1,-1,-1,1,1,-1));
@@ -142,7 +144,7 @@ function rotateShape(shape, yaw, pitch, roll){
 
 
 function drawFloorAndCeiling(){
-  
+
   let lw=X=Y=Z=P1=P2=0
   for(let l=0;l<2;++l){
     Y=l?1:ceiling
@@ -199,25 +201,53 @@ function clearScreen(){
   x.fillStyle="#000"
   x.fillRect(0,0,w*2,h*2)
   x.globalAlpha=1
-  x.drawImage(hud,0,0,w*2,h*2)  
+  if(showHud)x.drawImage(hud,0,0,w*2,h*2)
+  x.fillStyle="#4F4"
+  x.font = "20px Arial"
+  x.fillText('collected: '+playerCubeScore, 20, 20);
 }
 
 
 function drawShapes(){
-  for(i=shapes.length;i--;){
-		X=shapes[i].x
-		Y=shapes[i].y
-		Z=shapes[i].z
+  for(i=terrain.length;i--;){
+		X=terrain[i].x
+		Y=terrain[i].y
+		Z=terrain[i].z
+    SC=terrain[i].scale
 		let point=P3D(X,Y,Z)
     if(point){
       a=.75-Math.pow(point[2]/fieldRadius,6)*.75
       x.globalAlpha=a<0?0:a
-      x.strokeStyle=`#fff`
+      x.strokeStyle=terrain[i].c;
       x.lineWidth=40/(1+point[2])
       x.beginPath()
       for(let j=12;j--;){
-        pta=P3D(X+shapes[i].s[j].a.x,Y+shapes[i].s[j].a.y,Z+shapes[i].s[j].a.z)
-        ptb=P3D(X+shapes[i].s[j].b.x,Y+shapes[i].s[j].b.y,Z+shapes[i].s[j].b.z)
+        pta=P3D(X+terrain[i].s[j].a.x,Y+terrain[i].s[j].a.y*SC,Z+terrain[i].s[j].a.z)
+        ptb=P3D(X+terrain[i].s[j].b.x,Y+terrain[i].s[j].b.y*SC,Z+terrain[i].s[j].b.z)
+        if(pta&&ptb){
+          x.moveTo(...pta)
+          x.lineTo(...ptb)
+        }
+      }
+      x.stroke()
+    }
+	}
+
+  for(i=shapes.length;i--;){
+		X=shapes[i].x
+		Y=shapes[i].y
+		Z=shapes[i].z
+    SC=shapes[i].scale
+		let point=P3D(X,Y,Z)
+    if(point){
+      a=.75-Math.pow(point[2]/fieldRadius,6)*.75
+      x.globalAlpha=a<0?0:a
+      x.strokeStyle=shapes[i].c;
+      x.lineWidth=40/(1+point[2])
+      x.beginPath()
+      for(let j=12;j--;){
+        pta=P3D(X+shapes[i].s[j].a.x*SC,Y+shapes[i].s[j].a.y*SC,Z+shapes[i].s[j].a.z*SC)
+        ptb=P3D(X+shapes[i].s[j].b.x*SC,Y+shapes[i].s[j].b.y*SC,Z+shapes[i].s[j].b.z*SC)
         if(pta&&ptb){
           x.moveTo(...pta)
           x.lineTo(...ptb)
@@ -231,24 +261,30 @@ function drawShapes(){
 
 
 function handleShapes(){
-  for(let i=0;i<shapes.length;++i){
+  for(let i=shapes.length-1;i>0;--i){
     if(camX-shapes[i].x>fieldRadius)shapes[i].x+=fieldRadius*2
     if(camX-shapes[i].x<-fieldRadius)shapes[i].x-=fieldRadius*2
     if(camZ-shapes[i].z>fieldRadius)shapes[i].z+=fieldRadius*2
     if(camZ-shapes[i].z<-fieldRadius)shapes[i].z-=fieldRadius*2
     rotateShape(shapes[i],.01,.02,i/1000)
+
+    if(camX-shapes[i].x<playerRadius && camX-shapes[i].x>-playerRadius &&
+      camZ-shapes[i].z<playerRadius && camZ-shapes[i].z>-playerRadius){
+        playerCubeScore++; shapes.splice(i,1) }
+
+
   }
 }
 
 
 function process(){
-  
+
   handleCamera()
   handleShapes()
   clearScreen()
   drawFloorAndCeiling()
   drawShapes()
-  
+
   t+=1/60;
   requestAnimationFrame(process);
 }
@@ -256,7 +292,26 @@ function process(){
 
 function loadScene(){
   shapes=[]
-  for(let i=0;i<cubeCount;++i)shapes.push(new Cube(fieldRadius-Math.random()*fieldRadius*2,floor-1-Math.random()*(floor-ceiling-2),fieldRadius-Math.random()*fieldRadius*2))
+  terrain=[]
+  for(let i=0;i<cubeCount;++i){
+    shapes.push(new Cube(
+      ng.nextFloatRange(-fieldRadius, fieldRadius),
+      ng.nextFloatRange(floor-ceiling-2, floor-1), //floor-1-Math.random()*(floor-ceiling-2),
+      ng.nextFloatRange(-fieldRadius, fieldRadius),
+      ng.nextFloatRange(.5, 2),  //1+Math.random()-.5, //scale
+      cubeColors[ng.nextIntRange(0,2)]
+    ))
+  }
+
+  for(let i=0;i<100;++i){
+    terrain.push(new Cube(
+      ng.nextFloatRange(-fieldRadius, fieldRadius),
+      floor-1,
+      ng.nextFloatRange(-fieldRadius, fieldRadius),
+      ng.nextFloatRange(.5, 10),
+      '#00f'
+    ))
+  }
 }
 
 
@@ -273,6 +328,7 @@ onkeydown=function(e){
     case 65:akey=1;break;
     case 83:skey=1;break;
     case 68:dkey=1;break;
+    case 72:hkey=1;break;
   }
 }
 
@@ -290,6 +346,7 @@ onkeyup=function(e){
     case 65:akey=0;break;
     case 83:skey=0;break;
     case 68:dkey=0;break;
+    case 72:hkey=0;showHud = !showHud; break;
   }
 }
 
@@ -327,11 +384,16 @@ function mouse(e) {
 	my += movementY;
 }
 
-cubeCount=50
+ng = new LCG();
+ng.setSeed(1019);
+cubeCount=90
+cubeColors=['#ff0','#f00','#f80']
 fieldRadius=150
 gridSegs=8
 playerRotateSpeed=.025
 playerSpeed=.1
+playerCubeScore=0;
+playerRadius = 9;
 floor=1
 ceiling=-6
 camVX=camVY=camVZ=camX=camY=camZ=camPitchV=camYawV=camPitch=0
@@ -339,6 +401,7 @@ camYaw=1
 mx=my=leftbutton=rightbutton=shiftkey=ctrlkey=spacekey=upkey=downkey=leftkey=rightkey=wkey=akey=skey=dkey=0
 w=c.width/2,h=c.height/2,t=0
 hud=new Image()
+showHud = false;
 hud.src="hud1.png"
 loadScene()
 process()
