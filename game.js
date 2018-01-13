@@ -211,7 +211,7 @@ function clearScreen(){
 function drawShapes(){
   for(i=terrain.length;i--;){
 		X=terrain[i].x
-		Y=terrain[i].y
+		Y=terrain[i].y-terrain[i].scale/2
 		Z=terrain[i].z
     SC=terrain[i].scale
 		let point=P3D(X,Y,Z)
@@ -306,12 +306,20 @@ function loadScene(){
   for(let i=0;i<100;++i){
     terrain.push(new Cube(
       ng.nextFloatRange(-fieldRadius, fieldRadius),
-      floor-1,
+      0,
       ng.nextFloatRange(-fieldRadius, fieldRadius),
-      ng.nextFloatRange(.5, 10),
+      1,
       '#00f'
     ))
   }
+
+  terrain.push(new Cube(
+    0,
+    0,
+    0,
+    1,
+    '#fff'
+  ))
 }
 
 
