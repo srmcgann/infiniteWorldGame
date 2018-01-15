@@ -66,8 +66,8 @@ function handleCamera(){
   camX+=camVX
   camY+=camVY
   camZ+=camVZ
-  if(camY<ceiling+1)camY=ceiling+1
-  if(camY>floor-1)camY=floor-1
+  //if(camY<ceiling+1)camY=ceiling+1
+  //if(camY>floor-1)camY=floor-1
   camVX/=1.5
   camVY/=1.5
   camVZ/=1.5
@@ -343,7 +343,7 @@ function loadScene(){
   for(let i=0;i<100;++i){
     terrain.push(new Cube(
       ng.nextFloatRange(-fieldRadius, fieldRadius),
-      0       ,
+      1       ,
       ng.nextFloatRange(-fieldRadius, fieldRadius),
       1,
       '#00f'
@@ -351,11 +351,16 @@ function loadScene(){
   }
 
   terrain.push(new Cube(
-    0,
-    0,
-    0,
-    1,
+    0, 1, 1, 1,
     '#fff'
+  ))
+  terrain.push(new Cube(
+    0, 0, 3, 1,
+    '#ff0'
+  ))
+  terrain.push(new Cube(
+    0, -1, 5, 1,
+    '#0ff'
   ))
 }
 
