@@ -349,7 +349,10 @@ function loadScene(){
       '#00f'
     ))
   }
-
+  terrain.push(new Cube(
+    0, 2, -1, 1,
+    '#f0f'
+  ))
   terrain.push(new Cube(
     0, 1, 1, 1,
     '#fff'
