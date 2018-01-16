@@ -404,7 +404,7 @@ function drawModels(){
 }
 
 function process(){
-
+  stats.begin()
   handleCamera()
   handleShapes()
   handleModels()
@@ -414,6 +414,7 @@ function process(){
   drawModels()
   drawScore()
   t+=1/60;
+  stats.end();
   requestAnimationFrame(process);
 }
 
@@ -421,6 +422,9 @@ function process(){
 function loadScene(){
   shapes=[]
   terrain=[]
+  stats = new Stats();
+  stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+  document.body.appendChild( stats.dom );
   for(let i=0;i<cubeCount;++i){
     shapes.push(new Cube(
       ng.nextFloatRange(-fieldRadius, fieldRadius),
@@ -562,7 +566,8 @@ playerCubeScore=0;
 playerRadius = 5;
 floor=1
 ceiling=-6
-showFloor=showCeiling=1
+showCeiling=1
+showFloor=1
 camVX=camVY=camVZ=camPitchV=camYawV=camPitch=0
 camX=40
 camY=0
