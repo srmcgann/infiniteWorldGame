@@ -8,17 +8,12 @@
 	</head>
 	<body>
 		<canvas id=canvas></canvas>
-		<div id=output></div>
-		<script>
-			c=document.getElementById("canvas");
-			x=c.getContext("2d");
-			c.width=1920;
-			c.height=1080;
-			S=Math.sin;
-			C=Math.cos;
-	  </script>
-		<script src ='lcg.js'></script>
-		<script src ='stats.js'></script>
-		<script src="game.js"></script>
+
+		<script src ='lib/three.min.js'></script>
+		<script src ='lib/FirstPersonControls.js'></script>
+		<script src ='lib/lcg.js'></script>
+		<script src ='lib/stats.js'></script>
+
+		<script src="main.js"></script>
 	</body>
 </html>
