@@ -2,6 +2,7 @@ function process(){
   stats.begin();
 
   controls.update( 1/60 );
+  handleCamera();
   handleObjects();
   renderer.render( scene, camera );
 
@@ -104,12 +105,8 @@ function loadScene(){
   floorPlane.name = 'floorPlane';
   scene.add(floorPlane);
 
-
-
   geometry = new THREE.CubeGeometry(1,1,1)
-  material = new THREE.MeshLambertMaterial({ color:0xff2288 })
-
-
+  
   for ( var i = 0; i < cubeCount; i ++ ) {
 					var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
 					object.position.x = ng.nextFloatRange(-fieldRadius, fieldRadius);
@@ -128,6 +125,11 @@ function loadScene(){
 
   camera.position.z = 5;
 
+}
+
+function handleCamera(){
+  if(camera.position.y > 19)camera.position.y = 19;
+  if(camera.position.y < -19)camera.position.y = -19;
 }
 
 function onWindowResize() {
