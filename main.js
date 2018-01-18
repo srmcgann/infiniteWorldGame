@@ -12,6 +12,7 @@ function process(){
 
 function init(){
   ng = new LCG();
+  ng.setSeed(1019);
   stats = new Stats();
 
   stats.showPanel( 1 ); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -88,11 +89,7 @@ function loadScene(){
   var light = new THREE.AmbientLight( 0x404040 ); // soft white light
   scene.add( light );
 
-  //another approach for grids?
-
-
   //ceiling
-
   ceilingPlane = new THREE.GridHelper( 900, 200, 0x8888ff, 0x8888ff );
   ceilingPlane.position.y=20;
   ceilingPlane.name = 'ceilingPlane';
@@ -106,7 +103,7 @@ function loadScene(){
   scene.add(floorPlane);
 
   geometry = new THREE.CubeGeometry(1,1,1)
-  
+
   for ( var i = 0; i < cubeCount; i ++ ) {
 					var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
 					object.position.x = ng.nextFloatRange(-fieldRadius, fieldRadius);
