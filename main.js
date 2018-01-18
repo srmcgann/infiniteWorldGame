@@ -17,24 +17,9 @@ function init(){
   document.body.appendChild( stats.dom );
   ng.setSeed(1019);
   cubeCount=90
-  cubes=[];
   cubeColors=['#1f8','#18f']
   fieldRadius=150
-  gridSegs=8
-  playerRotateSpeed=.025
-  playerSpeed=.1
-  playerCubeScore=0;
-  playerRadius = 5;
-  floor=1
-  ceiling=-6
-  camVX=camVY=camVZ=camPitchV=camYawV=camPitch=0
-  camX=40
-  camY=0
-  camZ=25
-  camYaw=3.6
-  lineSubs=1
-  mx=my=leftbutton=rightbutton=shiftkey=ctrlkey=spacekey=upkey=downkey=leftkey=rightkey=wkey=akey=skey=dkey=ckey=fkey=0
-  //w=c.width/2,h=c.height/2,t=0
+    //w=c.width/2,h=c.height/2,t=0
   hud=new Image()
   showHud = false;
   hud.src="hud1.png"
@@ -55,20 +40,30 @@ function handleObjects(){
 		intersect.material.color.set( 0xffff00 );
     }
 
+  scene.traverse (function (object) {
+      if (object.name == 'cube')
+      {
+          object.rotation.x += .02;
 
+          if(camera.position.z - object.position.z > fieldRadius)object.position.z += fieldRadius*2;
+          if(camera.position.z - object.position.z < -fieldRadius)object.position.z -= fieldRadius*2;
+          if(camera.position.x - object.position.x > fieldRadius)object.position.x += fieldRadius*2;
+          if(camera.position.x - object.position.x < -fieldRadius)object.position.x -= fieldRadius*2;
+      }
+  });
 }
 
 function loadScene(){
 
   scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0, 75,130)
+  scene.fog = new THREE.Fog(0, 50,130)
 
   // ( FOV, aspectRatio, near clipping, far clipping)
   camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
   raycaster = new THREE.Raycaster();
   center = new THREE.Vector2(0,0);
   raycaster.setFromCamera( center, camera );
-  raycaster.near = 0; raycaster.far = 5;
+  raycaster.near = 0; raycaster.far = 20;
 
   renderer = new THREE.WebGLRenderer();
 
@@ -76,7 +71,7 @@ function loadScene(){
   document.body.appendChild( renderer.domElement );
 
   controls = new THREE.FirstPersonControls( camera );
-				controls.movementSpeed = 10;
+				controls.movementSpeed = 15;
 				controls.lookSpeed = 0.2;
 				controls.lookVertical = true;
 
@@ -89,25 +84,23 @@ function loadScene(){
 	light = new THREE.DirectionalLight( 0x8888ff, 0.8 );
 	light.position.set( 130, -80, 120 );
 	scene.add(light);
+  var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+  scene.add( light );
+
+  //another approach for grids?
+
 
   //ceiling
-  geometry = new THREE.PlaneGeometry(1,1,60,60)
-  material = new THREE.MeshLambertMaterial({ color:0x8888ff, wireframe: true })
-  ceilingPlane = new THREE.Mesh(geometry, material);
-  ceilingPlane.scale.set(fieldRadius*2, fieldRadius*2, fieldRadius*2)
-  ceilingPlane.position.y=20;
-  ceilingPlane.rotation.x= Math.PI/2;
-  ceilingPlane.name = 'ceilingPlane';
 
+  ceilingPlane = new THREE.GridHelper( 900, 200, 0x8888ff, 0x8888ff );
+  ceilingPlane.position.y=20;
+  ceilingPlane.name = 'ceilingPlane';
   scene.add(ceilingPlane);
 
 
   //floor
-  material = new THREE.MeshLambertMaterial({ color:0x880000, wireframe: true })
-  floorPlane = new THREE.Mesh(geometry, material);
-  floorPlane.scale.set(fieldRadius*2, fieldRadius*2, fieldRadius*2)
+  floorPlane = new THREE.GridHelper( 900, 200, 0xff0000, 0xff0000 );
   floorPlane.position.y=-20;
-  floorPlane.rotation.x= -Math.PI/2;
   floorPlane.name = 'floorPlane';
   scene.add(floorPlane);
 
@@ -120,7 +113,7 @@ function loadScene(){
   for ( var i = 0; i < cubeCount; i ++ ) {
 					var object = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial( { color: Math.random() * 0xffffff } ) );
 					object.position.x = ng.nextFloatRange(-fieldRadius, fieldRadius);
-					object.position.y = ng.nextFloatRange(floor,ceiling);
+					object.position.y = ng.nextFloatRange(-15,15);
 					object.position.z = ng.nextFloatRange(-fieldRadius, fieldRadius);
 					object.rotation.x = ng.nextFloatRange(2,10);
 					object.rotation.y = ng.nextFloatRange(2,10);
@@ -129,12 +122,11 @@ function loadScene(){
 					object.scale.x = size
 					object.scale.y = size
 					object.scale.z = size
-          cubes.push[object];
+          object.name = 'cube';
 					scene.add( object );
 				}
 
   camera.position.z = 5;
-
 
 }
 
